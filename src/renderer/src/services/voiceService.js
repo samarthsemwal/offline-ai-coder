@@ -15,9 +15,8 @@
 import { pipeline, env } from '@huggingface/transformers'
 
 // ─── Whisper Model Config ─────────────────────────────────────────────────────
-
-// tiny.en = ~42MB, English only, fastest. Use 'Xenova/whisper-base' for multilingual.
-const MODEL_ID = 'Xenova/whisper-tiny.en'
+// Use onnx-community which has updated weights compatible with latest ORT
+const MODEL_ID = 'onnx-community/whisper-tiny.en'
 
 // Cache model in app's local cache dir (persists across sessions)
 env.allowLocalModels = false
@@ -168,8 +167,6 @@ export function createVoiceInput ({ onResult, onStart, onStop, onError, onModelS
 
           // Transcribe 🎙️
           const result = await asr(float32Audio, {
-            language: 'english',
-            task: 'transcribe',
             return_timestamps: false
           })
 

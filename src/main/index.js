@@ -247,6 +247,11 @@ function createWindow () {
     mainWindow.focus()
   })
 
+  // Pipe renderer console logs to the main terminal for debugging
+  mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+    console.log(`[Renderer] ${message}`)
+  })
+
   // Clean up ollama process when app closes (if we started it)
   mainWindow.on('closed', () => {
     mainWindow = null
