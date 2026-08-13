@@ -1,0 +1,289 @@
+/* chat.css — Message list, bubbles, markdown, code blocks */
+
+/* ── Chat Panel Container ─────────────────────────────────────────────────── */
+.chat-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Message List ─────────────────────────────────────────────────────────── */
+.message-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-6) var(--space-5) var(--space-4);
+  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* ── Message Bubble ───────────────────────────────────────────────────────── */
+.message-bubble {
+  display: flex;
+  gap: var(--space-3);
+  max-width: 100%;
+  animation: messageSlideIn 0.25s ease forwards;
+}
+
+/* User messages align right */
+.message-bubble.user {
+  flex-direction: row-reverse;
+}
+
+/* ── Avatar ───────────────────────────────────────────────────────────────── */
+.message-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.message-bubble.user .message-avatar {
+  background: linear-gradient(135deg, #1a3a5c, #1e3a6e);
+  border: 1px solid var(--user-bubble-border);
+}
+
+.message-bubble.assistant .message-avatar {
+  background: linear-gradient(135deg, #1a2640, #1e2d4e);
+  border: 1px solid rgba(88, 166, 255, 0.15);
+}
+
+/* ── Message Content Wrapper ──────────────────────────────────────────────── */
+.message-content-wrapper {
+  flex: 1;
+  min-width: 0;
+  max-width: calc(100% - 48px);
+}
+
+.message-bubble.user .message-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* ── Role Label ───────────────────────────────────────────────────────────── */
+.message-role-label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: var(--space-1);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.message-timestamp {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* ── User Bubble ──────────────────────────────────────────────────────────── */
+.user-bubble {
+  background: var(--user-bubble-bg);
+  border: 1px solid var(--user-bubble-border);
+  border-radius: var(--radius-lg) var(--radius-lg) var(--radius-sm) var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 80%;
+}
+
+/* ── Assistant Message ────────────────────────────────────────────────────── */
+.assistant-content {
+  color: var(--text-primary);
+  font-size: var(--text-base);
+  line-height: 1.75;
+  word-break: break-word;
+}
+
+/* ── Markdown Typography ──────────────────────────────────────────────────── */
+.markdown-body p {
+  margin: 0 0 var(--space-3);
+}
+
+.markdown-body p:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body h1, .markdown-body h2, .markdown-body h3,
+.markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: var(--space-5) 0 var(--space-3);
+  line-height: 1.4;
+}
+
+.markdown-body h1 { font-size: var(--text-xl); }
+.markdown-body h2 { font-size: var(--text-lg); border-bottom: 1px solid var(--border); padding-bottom: var(--space-2); }
+.markdown-body h3 { font-size: var(--text-base); }
+
+.markdown-body ul, .markdown-body ol {
+  padding-left: var(--space-6);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.markdown-body li {
+  margin-bottom: var(--space-1);
+  line-height: 1.65;
+}
+
+.markdown-body strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.markdown-body em {
+  color: var(--text-secondary);
+}
+
+.markdown-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color var(--transition-fast);
+}
+
+.markdown-body a:hover {
+  text-decoration-color: var(--accent);
+}
+
+.markdown-body blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: var(--space-4);
+  margin: var(--space-3) 0;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.markdown-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: var(--space-5) 0;
+}
+
+.markdown-body table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: var(--space-3) 0;
+  font-size: var(--text-sm);
+}
+
+.markdown-body th, .markdown-body td {
+  border: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+}
+
+.markdown-body th {
+  background: var(--bg-tertiary);
+  font-weight: 600;
+}
+
+.markdown-body tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* ── Inline Code ──────────────────────────────────────────────────────────── */
+.markdown-body :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  color: var(--accent-purple);
+  padding: 1px 6px;
+  border-radius: 4px;
+  word-break: break-word;
+}
+
+/* ── Code Block Wrapper ───────────────────────────────────────────────────── */
+.code-block-wrapper {
+  position: relative;
+  margin: var(--space-3) 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: #0d1117;
+}
+
+.code-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+}
+
+.code-block-lang {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  font-weight: 500;
+  text-transform: lowercase;
+}
+
+.btn-copy-code {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--bg-quaternary);
+  transition: var(--transition-fast);
+}
+
+.btn-copy-code:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.btn-copy-code.copied {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+  background: var(--accent-green-dim);
+}
+
+/* Override react-syntax-highlighter default styles */
+.code-block-wrapper pre {
+  margin: 0 !important;
+  border-radius: 0 !important;
+  font-family: var(--font-mono) !important;
+  font-size: 13px !important;
+  line-height: 1.65 !important;
+  overflow-x: auto;
+}
+
+/* ── Typing Indicator ─────────────────────────────────────────────────────── */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  width: fit-content;
+}
+
+/* ── Streaming Content ────────────────────────────────────────────────────── */
+.streaming-message .assistant-content {
+  /* The streaming cursor is added via the .streaming-cursor CSS class */
+}

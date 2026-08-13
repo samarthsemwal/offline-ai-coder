@@ -1,0 +1,125 @@
+/* animations.css — all keyframes and reusable animation utilities */
+
+/* ── Message Entrance ─────────────────────────────────────────────────────── */
+@keyframes messageSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.message-enter {
+  animation: messageSlideIn 0.25s ease forwards;
+}
+
+/* ── Typing Indicator Dots ────────────────────────────────────────────────── */
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%           { transform: translateY(-6px); opacity: 1; }
+}
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: typingBounce 1.2s ease infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+/* ── Mic Pulse ────────────────────────────────────────────────────────────── */
+@keyframes micPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.5); }
+  50%      { box-shadow: 0 0 0 8px rgba(248, 81, 73, 0); }
+}
+
+.mic-pulsing {
+  animation: micPulse 1.2s ease infinite;
+}
+
+/* ── Connection Dot Pulse ─────────────────────────────────────────────────── */
+@keyframes connectedPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+.status-dot-connected {
+  animation: connectedPulse 2.5s ease infinite;
+}
+
+/* ── Fade In ──────────────────────────────────────────────────────────────── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+/* ── Sidebar Slide ────────────────────────────────────────────────────────── */
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ── Modal Entrance ───────────────────────────────────────────────────────── */
+@keyframes modalScaleIn {
+  from { opacity: 0; transform: scale(0.95) translateY(-10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-enter {
+  animation: modalScaleIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* ── Shimmer (loading state) ──────────────────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--bg-tertiary) 25%,
+    var(--bg-quaternary) 50%,
+    var(--bg-tertiary) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease infinite;
+}
+
+/* ── Spin ─────────────────────────────────────────────────────────────────── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+/* ── Progress Bar Fill ────────────────────────────────────────────────────── */
+@keyframes progressFill {
+  from { width: 0%; }
+}
+
+/* ── Stream cursor blink ──────────────────────────────────────────────────── */
+@keyframes cursorBlink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+.streaming-cursor::after {
+  content: '▋';
+  color: var(--accent);
+  animation: cursorBlink 0.8s step-end infinite;
+  font-size: 0.85em;
+  margin-left: 1px;
+}

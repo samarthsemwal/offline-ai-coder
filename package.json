@@ -1,0 +1,72 @@
+{
+  "name": "offline-coder-chat",
+  "version": "1.0.0",
+  "description": "A fully offline desktop chat app for coding and DSA practice, powered by local Ollama LLMs.",
+  "productName": "Offline Coder Chat",
+  "main": "out/main/index.js",
+  "author": "Offline Coder",
+  "private": true,
+  "scripts": {
+    "start": "electron-vite dev",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "package": "electron-vite build && electron-builder --config.files='out/**/*'",
+    "preview": "electron-vite preview",
+    "lint": "eslint src --ext .js,.jsx"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "electron-updater": "^6.1.7",
+    "ollama": "^0.5.9",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-markdown": "^9.0.1",
+    "react-syntax-highlighter": "^15.5.0",
+    "remark-gfm": "^4.0.0",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "electron": "^33.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-vite": "^2.3.0",
+    "vite": "^5.0.0"
+  },
+  "build": {
+    "appId": "com.offlinecoder.chat",
+    "productName": "Offline Coder Chat",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "out/**/*"
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.developer-tools",
+      "hardenedRuntime": true
+    },
+    "dmg": {
+      "title": "Offline Coder Chat",
+      "sign": false
+    },
+    "linux": {
+      "target": "AppImage"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  },
+  "allowScripts": {
+    "electron@33.4.11": true,
+    "esbuild@0.21.5": true,
+    "onnxruntime-node@1.24.3": true,
+    "sharp@0.34.5": true,
+    "protobufjs@7.6.5": true,
+    "fsevents@2.3.3": true
+  }
+}
