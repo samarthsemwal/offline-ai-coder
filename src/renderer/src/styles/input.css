@@ -84,6 +84,7 @@
   color: var(--accent);
   border-color: var(--accent);
   background: var(--accent-dim);
+  transform: scale(1.05);
 }
 
 .btn-mic.recording {
@@ -91,6 +92,31 @@
   background: var(--accent-red);
   border-color: var(--accent-red);
   animation: micPulse 1.2s ease infinite;
+  box-shadow: 0 0 0 0 rgba(248, 81, 73, 0.5);
+}
+
+/* Ripple ring effect while recording */
+.btn-mic.recording::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  border: 2px solid rgba(248, 81, 73, 0.5);
+  animation: micRipple 1.4s ease-out infinite;
+}
+
+.btn-mic.recording::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 2px solid rgba(248, 81, 73, 0.2);
+  animation: micRipple 1.4s ease-out infinite 0.4s;
+}
+
+@keyframes micRipple {
+  0%   { transform: scale(0.9); opacity: 1; }
+  100% { transform: scale(1.3); opacity: 0; }
 }
 
 /* ── Send / Stop Button ───────────────────────────────────────────────────── */

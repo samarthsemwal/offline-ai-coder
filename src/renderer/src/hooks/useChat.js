@@ -111,6 +111,7 @@ export function useChat ({ selectedModel, onSessionSaved }) {
     const chatHistory = updatedMessages.map(({ role, content }) => ({ role, content }))
 
     let accumulatedContent = ''
+    const responseStartTime = Date.now() // ⏱️ Track response time
 
     await streamChat({
       model: selectedModel,
@@ -123,12 +124,14 @@ export function useChat ({ selectedModel, onSessionSaved }) {
       },
 
       onDone: async () => {
+        const responseTimeMs = Date.now() - responseStartTime
         // Replace the streaming placeholder with the final assistant message
         const assistantMessage = {
           id: uuidv4(),
           role: 'assistant',
           content: accumulatedContent,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
+          responseTimeMs // ⏱️ Store how long the response took
         }
         const finalMessages = [...updatedMessages, assistantMessage]
         setMessages(finalMessages)
