@@ -11,7 +11,7 @@ import '../styles/settings.css'
 
 const SECTIONS = ['General', 'AI', 'Voice', 'Privacy', 'Shortcuts', 'About']
 
-export default function Settings ({
+export default function Settings({
   settings,
   onUpdateSetting,
   onUpdateSettings,
@@ -23,7 +23,7 @@ export default function Settings ({
 }) {
   const [activeSection, setActiveSection] = useState('General')
 
-  function handlePreset (preset) {
+  function handlePreset(preset) {
     const presetData = TEMPERATURE_PRESETS[preset]
     onUpdateSettings({
       temperaturePreset: preset,
@@ -117,10 +117,10 @@ export default function Settings ({
                     {models.length === 0
                       ? <option value={selectedModel}>{selectedModel || 'No models installed'}</option>
                       : models.map(m => (
-                          <option key={m.name} value={m.name}>
-                            {m.name}{m.sizeFormatted ? ` (${m.sizeFormatted})` : ''}
-                          </option>
-                        ))
+                        <option key={m.name} value={m.name}>
+                          {m.name}{m.sizeFormatted ? ` (${m.sizeFormatted})` : ''}
+                        </option>
+                      ))
                     }
                   </select>
                 </div>
@@ -326,7 +326,7 @@ export default function Settings ({
                       ['Send message', 'Enter'],
                       ['New line in input', 'Shift+Enter'],
                       ['Stop generation', '⏹ (Stop button)'],
-                      ['Stealth mode toggle', '⌘⇧H']
+
                     ].map(([action, key]) => (
                       <tr key={action}>
                         <td>{action}</td>
