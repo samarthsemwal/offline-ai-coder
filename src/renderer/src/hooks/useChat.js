@@ -6,6 +6,7 @@
  * - Handles streaming responses (token by token)
  * - Auto-saves the session to disk after each complete response
  * - Manages abort controller for "stop generating" functionality
+ * - Supports: deleteMessage, regenerateMessage, retryLastMessage
  */
 
 import { useState, useCallback, useRef } from 'react'
@@ -16,38 +17,22 @@ import { SESSION_TITLE_MAX_LENGTH } from '../config.js'
 
 /**
  * @param {Object} params
- * @param {string} params.selectedModel       - Currently selected Ollama model name
+ * @param {string}   params.selectedModel     - Currently selected Ollama model name
  * @param {Function} params.onSessionSaved    - Called with updated session metadata after each save
- *
- * @returns {{
- *   messages: Array,
- *   isStreaming: boolean,
- *   streamingContent: string,
- *   currentSession: Object|null,
- *   sendMessage: Function,
- *   newChat: Function,
- *   loadSessionData: Function,
- *   abortStream: Function,
- *   errorMessage: string|null,
- *   clearError: Function
- * }}
+ * @param {number}   [params.temperature]     - Sampling temperature (from settings, default 0.2)
+ * @param {string}   [params.systemPrompt]    - System prompt override from settings
  */
-export function useChat ({ selectedModel, onSessionSaved }) {
+export function useChat ({ selectedModel, onSessionSaved, temperature = 0.2, systemPrompt }) {
   const [messages, setMessages] = useState([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [streamingContent, setStreamingContent] = useState('')
   const [currentSession, setCurrentSession] = useState(null)
   const [errorMessage, setErrorMessage] = useState(null)
 
-  // AbortController ref — allows cancelling an in-flight stream
   const abortControllerRef = useRef(null)
 
   // ── Session Helpers ─────────────────────────────────────────────────────────
 
-  /**
-   * Derive a human-readable title from the first user message.
-   * Truncates at SESSION_TITLE_MAX_LENGTH characters.
-   */
   function deriveTitle (firstMessage) {
     const text = firstMessage?.content ?? 'New Chat'
     return text.length > SESSION_TITLE_MAX_LENGTH
@@ -55,16 +40,13 @@ export function useChat ({ selectedModel, onSessionSaved }) {
       : text
   }
 
-  /**
-   * Persist the current session to disk.
-   * Creates a new session object if `currentSession` is null.
-   */
   const persistSession = useCallback(async (updatedMessages, session) => {
     const sessionToSave = session ?? {
       id: uuidv4(),
       title: deriveTitle(updatedMessages.find(m => m.role === 'user')),
       createdAt: new Date().toISOString(),
-      model: selectedModel
+      model: selectedModel,
+      pinned: false
     }
 
     const fullSession = {
@@ -78,45 +60,31 @@ export function useChat ({ selectedModel, onSessionSaved }) {
     return fullSession
   }, [selectedModel, onSessionSaved])
 
-  // ── Send Message ────────────────────────────────────────────────────────────
+  // ── Core Stream Executor ────────────────────────────────────────────────────
 
   /**
-   * Send a user message and stream the assistant's response.
-   * @param {string} content - The user's message text
+   * Internal: run a streaming chat request given a messages array.
+   * Used by sendMessage and regenerateMessage.
+   * @param {Array}  chatMessages   - Full messages array (including new user message)
+   * @param {Array}  messagesAfterUser - Messages as they should appear in state when streaming starts
+   * @param {Object} sessionRef     - Current session reference
    */
-  const sendMessage = useCallback(async (content) => {
-    if (!content.trim() || isStreaming) return
-
-    setErrorMessage(null)
-
-    // Create a new message object for the user
-    const userMessage = {
-      id: uuidv4(),
-      role: 'user',
-      content: content.trim(),
-      timestamp: new Date().toISOString()
-    }
-
-    // Optimistically add user message to UI
-    const updatedMessages = [...messages, userMessage]
-    setMessages(updatedMessages)
-
-    // Set up abort controller for this request
+  const executeStream = useCallback(async (chatMessages, messagesAfterUser, sessionRef) => {
     abortControllerRef.current = new AbortController()
-
     setIsStreaming(true)
     setStreamingContent('')
+    setErrorMessage(null)
 
-    // Build the conversation payload (role + content only, no extra fields)
-    const chatHistory = updatedMessages.map(({ role, content }) => ({ role, content }))
-
+    const chatHistory = chatMessages.map(({ role, content }) => ({ role, content }))
     let accumulatedContent = ''
-    const responseStartTime = Date.now() // ⏱️ Track response time
+    const responseStartTime = Date.now()
 
     await streamChat({
       model: selectedModel,
       messages: chatHistory,
       signal: abortControllerRef.current.signal,
+      temperature,
+      systemPrompt,
 
       onToken: (token) => {
         accumulatedContent += token
@@ -125,22 +93,20 @@ export function useChat ({ selectedModel, onSessionSaved }) {
 
       onDone: async () => {
         const responseTimeMs = Date.now() - responseStartTime
-        // Replace the streaming placeholder with the final assistant message
         const assistantMessage = {
           id: uuidv4(),
           role: 'assistant',
           content: accumulatedContent,
           timestamp: new Date().toISOString(),
-          responseTimeMs // ⏱️ Store how long the response took
+          responseTimeMs
         }
-        const finalMessages = [...updatedMessages, assistantMessage]
+        const finalMessages = [...messagesAfterUser, assistantMessage]
         setMessages(finalMessages)
         setStreamingContent('')
         setIsStreaming(false)
 
-        // Persist session to disk
-        const saved = await persistSession(finalMessages, currentSession)
-        if (!currentSession) setCurrentSession(saved)
+        const saved = await persistSession(finalMessages, sessionRef)
+        if (!sessionRef) setCurrentSession(saved)
         else setCurrentSession(prev => ({ ...prev, updatedAt: saved.updatedAt }))
       },
 
@@ -150,7 +116,82 @@ export function useChat ({ selectedModel, onSessionSaved }) {
         setErrorMessage(err.message)
       }
     })
-  }, [messages, isStreaming, selectedModel, currentSession, persistSession])
+  }, [selectedModel, temperature, systemPrompt, persistSession])
+
+  // ── Send Message ────────────────────────────────────────────────────────────
+
+  const sendMessage = useCallback(async (content) => {
+    if (!content.trim() || isStreaming) return
+
+    const userMessage = {
+      id: uuidv4(),
+      role: 'user',
+      content: content.trim(),
+      timestamp: new Date().toISOString()
+    }
+
+    const updatedMessages = [...messages, userMessage]
+    setMessages(updatedMessages)
+
+    await executeStream(updatedMessages, updatedMessages, currentSession)
+  }, [messages, isStreaming, currentSession, executeStream])
+
+  // ── Regenerate Message ──────────────────────────────────────────────────────
+
+  /**
+   * Regenerate the AI response for a given assistant message.
+   * Finds the preceding user message, re-sends history up to that point.
+   * @param {string} assistantMessageId
+   */
+  const regenerateMessage = useCallback(async (assistantMessageId) => {
+    if (isStreaming) return
+
+    const msgIndex = messages.findIndex(m => m.id === assistantMessageId)
+    if (msgIndex === -1 || messages[msgIndex].role !== 'assistant') return
+
+    // History to send: everything up to (but not including) the assistant message
+    const historyToSend = messages.slice(0, msgIndex)
+    // Messages shown in UI during streaming: history without the old assistant msg
+    const messagesBeforeAssistant = messages.slice(0, msgIndex)
+
+    setMessages(messagesBeforeAssistant)
+
+    await executeStream(historyToSend, messagesBeforeAssistant, currentSession)
+  }, [messages, isStreaming, currentSession, executeStream])
+
+  // ── Retry Last Message ──────────────────────────────────────────────────────
+
+  /**
+   * Retry after an error: re-send the last user message.
+   */
+  const retryLastMessage = useCallback(async () => {
+    if (isStreaming) return
+    const lastUser = [...messages].reverse().find(m => m.role === 'user')
+    if (!lastUser) return
+
+    const lastUserIndex = messages.lastIndexOf(messages.find(m => m.id === lastUser.id))
+    const historyToSend = messages.slice(0, lastUserIndex + 1)
+
+    setMessages(historyToSend)
+    setErrorMessage(null)
+
+    await executeStream(historyToSend, historyToSend, currentSession)
+  }, [messages, isStreaming, currentSession, executeStream])
+
+  // ── Delete Message ──────────────────────────────────────────────────────────
+
+  /**
+   * Remove a single message from the conversation and re-persist.
+   * @param {string} messageId
+   */
+  const deleteMessage = useCallback(async (messageId) => {
+    if (isStreaming) return
+    const updated = messages.filter(m => m.id !== messageId)
+    setMessages(updated)
+    if (currentSession) {
+      await persistSession(updated, currentSession)
+    }
+  }, [messages, isStreaming, currentSession, persistSession])
 
   // ── Abort Stream ─────────────────────────────────────────────────────────────
 
@@ -173,10 +214,6 @@ export function useChat ({ selectedModel, onSessionSaved }) {
 
   // ── Load Session ─────────────────────────────────────────────────────────────
 
-  /**
-   * Restore a session from disk into the chat state.
-   * @param {Object} session - Full session object with messages array
-   */
   const loadSessionData = useCallback((session) => {
     abortControllerRef.current?.abort()
     setMessages(session.messages ?? [])
@@ -195,6 +232,9 @@ export function useChat ({ selectedModel, onSessionSaved }) {
     newChat,
     loadSessionData,
     abortStream,
+    regenerateMessage,
+    retryLastMessage,
+    deleteMessage,
     errorMessage,
     clearError: () => setErrorMessage(null)
   }

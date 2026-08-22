@@ -1,27 +1,8 @@
 /**
- * Header — src/renderer/src/components/Header.jsx
- *
- * Top bar containing:
- * - macOS traffic light spacer (for hiddenInset titleBar)
- * - Sidebar toggle button
- * - App title
- * - Model selector dropdown (dynamic from Ollama)
- * - "Add Model" button
- * - Connection status indicator (live polling)
+ * Header — src/renderer/src/components/Header.jsx  (CodeLoom)
  */
 import '../styles/header.css'
 
-/**
- * @param {Object} props
- * @param {boolean}   props.sidebarOpen          - Is sidebar currently visible?
- * @param {Function}  props.onToggleSidebar       - Toggle sidebar open/closed
- * @param {boolean}   props.connected             - Is Ollama reachable?
- * @param {boolean}   props.isLoading             - Initial connection check in progress
- * @param {Array}     props.models                - [{name, size}] from /api/tags
- * @param {string}    props.selectedModel         - Currently selected model name
- * @param {Function}  props.onModelChange         - Called with new model name
- * @param {Function}  props.onAddModelClick       - Open the Add Model modal
- */
 export default function Header ({
   sidebarOpen,
   onToggleSidebar,
@@ -30,10 +11,19 @@ export default function Header ({
   models,
   selectedModel,
   onModelChange,
-  onAddModelClick
+  onAddModelClick,
+  onSettingsClick,
+  onPromptLibraryClick
 }) {
   const statusClass = isLoading ? 'loading' : (connected ? 'connected' : 'disconnected')
-  const statusText = isLoading ? 'Connecting…' : (connected ? 'Connected' : 'Ollama not running')
+  const statusText = isLoading ? 'Connecting…' : (connected ? 'Connected' : 'Ollama offline')
+
+  // Format model name for display option
+  function formatModelOption (model) {
+    const name = model.name
+    const size = model.sizeFormatted ? ` (${model.sizeFormatted})` : ''
+    return `${name}${size}`
+  }
 
   return (
     <header className="app-header" role="banner">
@@ -44,7 +34,7 @@ export default function Header ({
       <button
         className="btn-sidebar-toggle"
         onClick={onToggleSidebar}
-        title={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+        title={sidebarOpen ? 'Collapse sidebar (⌘B)' : 'Expand sidebar (⌘B)'}
         aria-label={sidebarOpen ? 'Collapse sidebar' : 'Expand sidebar'}
         aria-expanded={sidebarOpen}
         id="sidebar-toggle-btn"
@@ -55,7 +45,7 @@ export default function Header ({
       {/* App title */}
       <div className="header-title">
         <div className="header-title-icon" aria-hidden="true">⚡</div>
-        <span>Offline Coder Chat</span>
+        <span>CodeLoom</span>
       </div>
 
       {/* Center: Model selector */}
@@ -71,29 +61,59 @@ export default function Header ({
             title="Select AI model"
           >
             {models.length === 0 ? (
-              <option value={selectedModel}>{selectedModel}</option>
+              <option value={selectedModel}>{selectedModel || 'No models'}</option>
             ) : (
               models.map(model => (
                 <option key={model.name} value={model.name}>
-                  {model.name}
+                  {formatModelOption(model)}
                 </option>
               ))
             )}
           </select>
           <span className="model-select-chevron" aria-hidden="true">▾</span>
         </div>
+
+        {/* Refresh models button */}
+        <button
+          className="btn-icon-sm"
+          onClick={() => window.electronAPI?.checkOllamaStatus?.()}
+          title="Refresh model list"
+          aria-label="Refresh model list"
+        >
+          ↻
+        </button>
       </div>
 
-      {/* Right: Add model + connection status */}
+      {/* Right: Prompt library + Add model + Settings + Connection status */}
       <div className="header-right">
+        <button
+          className="btn-icon-sm"
+          onClick={onPromptLibraryClick}
+          title="Prompt Library (⌘⌥P)"
+          aria-label="Open prompt library"
+          id="prompt-library-btn"
+        >
+          📚
+        </button>
+
         <button
           className="btn-add-model"
           onClick={onAddModelClick}
           disabled={!connected}
-          title="Download a new model from Ollama registry"
+          title="Download a new Ollama model"
           id="add-model-btn"
         >
           + Add Model
+        </button>
+
+        <button
+          className="btn-icon-sm"
+          onClick={onSettingsClick}
+          title="Settings (⌘,)"
+          aria-label="Open settings"
+          id="settings-btn"
+        >
+          ⚙️
         </button>
 
         <div
