@@ -325,7 +325,8 @@ export default function Settings ({
                       ['Close modal/settings', 'Escape'],
                       ['Send message', 'Enter'],
                       ['New line in input', 'Shift+Enter'],
-                      ['Stop generation', '⏹ (Stop button)']
+                      ['Stop generation', '⏹ (Stop button)'],
+                      ['Stealth mode toggle', '⌘⇧H']
                     ].map(([action, key]) => (
                       <tr key={action}>
                         <td>{action}</td>
