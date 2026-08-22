@@ -2,7 +2,7 @@
 
 > A professional desktop AI assistant for developers. Runs **100% offline** using Ollama and Whisper — your code, your model, your machine.
 
-[![Release](https://img.shields.io/github/v/release/samarthsemwal/offline-ai-coder?color=brightgreen&label=Download%20Latest%20Release)](https://github.com/samarthsemwal/offline-ai-coder/releases)
+[![Release](https://img.shields.io/github/v/release/samarthsemwal/offline-ai-coder?color=brightgreen&label=Download%20macOS%20Release)](https://github.com/samarthsemwal/offline-ai-coder/releases)
 ![Platform](https://img.shields.io/badge/platform-macOS-blue?logo=apple)
 ![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
@@ -11,12 +11,11 @@
 
 ---
 
-## 📥 Download & Install
+## 📥 Download & Install (macOS)
 
-Get the latest standalone packaged builds for your platform from [GitHub Releases](https://github.com/samarthsemwal/offline-ai-coder/releases):
+Get the latest standalone macOS build from [GitHub Releases](https://github.com/samarthsemwal/offline-ai-coder/releases):
 
-- **macOS (Apple Silicon)**: Download `CodeLoom-1.0.0-arm64.dmg` or `CodeLoom-1.0.0-arm64-mac.zip`
-- **macOS (Intel)** / **Windows** / **Linux**: Packaged builds available under Releases
+- **macOS (Apple Silicon — M1/M2/M3/M4)**: Download **`CodeLoom-1.0.0-arm64.dmg`** or **`CodeLoom-1.0.0-arm64-mac.zip`**
 
 ### Quick Prerequisites
 1. Install and start [Ollama](https://ollama.com/download)
@@ -302,4 +301,4 @@ CodeLoom follows Electron security best practices:
 
 ## 📄 License
 
-MIT © CodeLoom Contributors
+This project is licensed under the [MIT License](LICENSE) — see the [LICENSE](LICENSE) file for details.
