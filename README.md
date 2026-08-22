@@ -3,7 +3,7 @@
 > A professional desktop AI assistant for developers. Runs **100% offline** using Ollama and Whisper — your code, your model, your machine.
 
 [![Release](https://img.shields.io/github/v/release/samarthsemwal/offline-ai-coder?color=brightgreen&label=Download%20Latest%20Release)](https://github.com/samarthsemwal/offline-ai-coder/releases)
-![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue)
+![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20)
 ![Electron](https://img.shields.io/badge/Electron-33-47848F?logo=electron)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)
 ![Ollama](https://img.shields.io/badge/Ollama-local%20inference-black)
