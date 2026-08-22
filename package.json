@@ -1,8 +1,8 @@
 {
-  "name": "offline-coder-chat",
+  "name": "codeloom",
   "version": "1.0.0",
-  "description": "A fully offline desktop chat app for coding and DSA practice, powered by local Ollama LLMs.",
-  "productName": "Offline Coder Chat",
+  "description": "CodeLoom — Private Local AI Coding Assistant. A professional desktop app powered by Ollama and Whisper, running 100% offline.",
+  "productName": "CodeLoom",
   "main": "out/main/index.js",
   "author": "Offline Coder",
   "private": true,
@@ -12,7 +12,10 @@
     "build": "electron-vite build",
     "package": "electron-vite build && electron-builder --config.files='out/**/*'",
     "preview": "electron-vite preview",
-    "lint": "eslint src --ext .js,.jsx"
+    "lint": "eslint src --ext .js,.jsx",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
@@ -26,15 +29,20 @@
     "uuid": "^9.0.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.5",
     "@vitejs/plugin-react": "^4.2.1",
     "electron": "^33.0.0",
     "electron-builder": "^24.9.1",
     "electron-vite": "^2.3.0",
-    "vite": "^5.0.0"
+    "jsdom": "^30.0.1",
+    "vite": "^5.0.0",
+    "vitest": "^4.1.11"
   },
   "build": {
-    "appId": "com.offlinecoder.chat",
-    "productName": "Offline Coder Chat",
+    "appId": "com.codeloom.app",
+    "productName": "CodeLoom",
     "directories": {
       "output": "release"
     },
@@ -51,7 +59,7 @@
       "hardenedRuntime": true
     },
     "dmg": {
-      "title": "Offline Coder Chat",
+      "title": "CodeLoom",
       "sign": false
     },
     "linux": {
