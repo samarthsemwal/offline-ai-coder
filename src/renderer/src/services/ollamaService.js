@@ -27,7 +27,9 @@ export async function checkConnection () {
     const models = (data.models || []).map(m => ({
       name: m.name,
       size: m.size,
-      modifiedAt: m.modified_at
+      modifiedAt: m.modified_at,
+      // Derive a human-readable size string
+      sizeFormatted: m.size ? formatBytes(m.size) : null
     }))
     return { ok: true, models }
   } catch (err) {
@@ -40,6 +42,18 @@ export async function checkConnection () {
   }
 }
 
+/**
+ * Format bytes to human-readable string.
+ * @param {number} bytes
+ * @returns {string}
+ */
+function formatBytes (bytes) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  return `${(bytes / 1024 / 1024 / 1024).toFixed(1)} GB`
+}
+
 // ─── Chat Streaming ───────────────────────────────────────────────────────────
 
 /**
@@ -49,18 +63,30 @@ export async function checkConnection () {
  * Calls `onError` on any failure.
  *
  * @param {Object} params
- * @param {string} params.model           - Model name e.g. "qwen2.5-coder:7b"
- * @param {Array}  params.messages        - Full conversation history [{role, content}]
- * @param {Function} params.onToken       - Called with each text chunk: (text: string) => void
- * @param {Function} params.onDone        - Called when streaming is complete: () => void
- * @param {Function} params.onError       - Called on error: (error: {type, message}) => void
- * @param {AbortSignal} params.signal     - AbortController signal for cancellation
+ * @param {string}   params.model           - Model name e.g. "qwen2.5-coder:7b"
+ * @param {Array}    params.messages        - Full conversation history [{role, content}]
+ * @param {Function} params.onToken         - Called with each text chunk: (text: string) => void
+ * @param {Function} params.onDone          - Called when streaming is complete: () => void
+ * @param {Function} params.onError         - Called on error: (error: {type, message}) => void
+ * @param {AbortSignal} params.signal       - AbortController signal for cancellation
+ * @param {number}   [params.temperature]   - Sampling temperature (0.0–2.0, default 0.2)
+ * @param {string}   [params.systemPrompt]  - System prompt override (falls back to config default)
  */
-export async function streamChat ({ model, messages, onToken, onDone, onError, signal }) {
+export async function streamChat ({
+  model,
+  messages,
+  onToken,
+  onDone,
+  onError,
+  signal,
+  temperature = 0.2,
+  systemPrompt
+}) {
   // Prepend system prompt as the first message if not already there
+  const activeSystemPrompt = systemPrompt || SYSTEM_PROMPT
   const fullMessages = messages[0]?.role === 'system'
     ? messages
-    : [{ role: 'system', content: SYSTEM_PROMPT }, ...messages]
+    : [{ role: 'system', content: activeSystemPrompt }, ...messages]
 
   let response
   try {
@@ -72,7 +98,7 @@ export async function streamChat ({ model, messages, onToken, onDone, onError, s
         messages: fullMessages,
         stream: true,
         options: {
-          temperature: 0.7,
+          temperature: Math.max(0, Math.min(2, temperature)),  // clamp 0–2
           top_p: 0.9
         }
       }),
@@ -99,8 +125,7 @@ export async function streamChat ({ model, messages, onToken, onDone, onError, s
     return
   }
 
-  // ── NDJSON Stream Parsing ───────────────────────────────────────────────────
-  // Ollama sends one JSON object per line. We buffer partial lines between reads.
+  // ── NDJSON Stream Parsing ──────────────────────────────────────────────────
   const reader = response.body.getReader()
   const decoder = new TextDecoder('utf-8')
   let buffer = ''
@@ -110,21 +135,13 @@ export async function streamChat ({ model, messages, onToken, onDone, onError, s
       const { done, value } = await reader.read()
 
       if (done) {
-        // Process any remaining content in the buffer
-        if (buffer.trim()) {
-          tryParseChunk(buffer, onToken)
-        }
+        if (buffer.trim()) tryParseChunk(buffer, onToken)
         onDone()
         break
       }
 
-      // Decode the binary chunk and add to our buffer
       buffer += decoder.decode(value, { stream: true })
-
-      // Split on newlines — complete JSON objects end with \n
       const lines = buffer.split('\n')
-
-      // The last element may be an incomplete JSON line — keep it in the buffer
       buffer = lines.pop() ?? ''
 
       for (const line of lines) {
@@ -132,7 +149,7 @@ export async function streamChat ({ model, messages, onToken, onDone, onError, s
       }
     }
   } catch (err) {
-    if (err.name === 'AbortError') return  // user cancelled
+    if (err.name === 'AbortError') return
     onError({
       type: 'stream_interrupted',
       message: 'The response stream was interrupted. Please try again.'
@@ -144,9 +161,6 @@ export async function streamChat ({ model, messages, onToken, onDone, onError, s
 
 /**
  * Parse a single NDJSON line from the Ollama stream.
- * Calls onToken with the message content if present.
- * Safely ignores malformed lines.
- *
  * @param {string} line
  * @param {Function} onToken
  */
@@ -164,9 +178,8 @@ function tryParseChunk (line, onToken) {
 
 /**
  * Pull (download) a model from the Ollama registry with live progress updates.
- * Ollama streams pull progress as NDJSON lines with { status, completed, total }.
  *
- * @param {Object} params
+ * @param {Object}   params
  * @param {string}   params.modelName    - e.g. "qwen2.5-coder:14b"
  * @param {Function} params.onProgress   - Called with { percent: number, status: string }
  * @param {Function} params.onDone       - Called when pull completes successfully
@@ -210,13 +223,10 @@ export async function pullModel ({ modelName, onProgress, onDone, onError, signa
         if (!line.trim()) continue
         try {
           const json = JSON.parse(line)
-          // `completed` and `total` are byte counts for download progress
           const percent = json.total
             ? Math.round((json.completed / json.total) * 100)
             : null
           onProgress({ percent, status: json.status || '' })
-
-          // Ollama sends `status: "success"` when the pull is complete
           if (json.status === 'success') { onDone(); return }
         } catch {
           // Ignore parse errors on intermediate progress lines

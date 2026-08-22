@@ -1,8 +1,7 @@
 /**
- * App-wide configuration — src/renderer/src/config.js
+ * App-wide configuration — src/renderer/src/config.js  (CodeLoom)
  *
  * All configurable values live here. No magic strings scattered in the codebase.
- * Change OLLAMA_HOST if Ollama runs on a different port or machine (e.g. remote dev).
  */
 
 /** Base URL for the local Ollama instance */
@@ -14,30 +13,41 @@ export const DEFAULT_MODEL = 'qwen2.5-coder:7b'
 /** How often (ms) to poll Ollama for connection status in the header */
 export const CONNECTION_POLL_INTERVAL_MS = 5000
 
-/** Maximum message length before we truncate in the session list title */
+/** Maximum message length for the session list title */
 export const SESSION_TITLE_MAX_LENGTH = 60
 
-/** System prompt injected at the start of every conversation */
-export const SYSTEM_PROMPT = `You are a smart, all-rounder personal assistant.
-You help with a wide range of tasks including:
-- Coding & DSA: write clean, well-commented code and explain time/space complexity
-- Writing: draft professional emails, letters, resumes, and documents
-- Design & Productivity: suggest UI/UX ideas, workflows, and best practices
-- Daily Life: cooking recipes, health tips, travel planning, finance advice
-- General Knowledge: answer questions clearly and factually
+/** Application metadata */
+export const APP_NAME = 'CodeLoom'
+export const APP_TAGLINE = 'Private Local AI Coding Assistant'
+
+/**
+ * System prompt injected at the start of every conversation.
+ * Users can override this in Settings → AI.
+ */
+export const SYSTEM_PROMPT = `You are CodeLoom, an expert AI coding assistant running entirely on the user's local machine via Ollama. You have deep knowledge of software engineering, algorithms, data structures, and multiple programming languages.
+
+Your primary focus is helping with:
+- Code explanation, debugging, refactoring, and optimization
+- Algorithm analysis and complexity (Big-O notation)
+- Code review with specific, actionable feedback
+- Writing tests, documentation, and technical content
+- Software architecture and design patterns
 
 Guidelines:
-- Be concise but complete. Don't pad answers unnecessarily.
-- For code, always add inline comments and mention Big-O complexity.
-- For writing tasks, match the tone the user asks for (formal, casual, friendly).
-- If unsure, say so honestly rather than guessing.`
+- Be precise and technical. Assume the user is a developer.
+- For code, always include inline comments for non-obvious logic.
+- When analyzing complexity, explain the reasoning (not just the result).
+- For code review, categorize issues by severity (Critical/High/Medium/Low).
+- If you are uncertain about something, say so clearly instead of guessing.
+- Keep responses concise but complete — don't pad unnecessarily.
+- Use code blocks with the correct language identifier for all code samples.`
 
-/** Example prompts shown on the empty state welcome screen */
-export const EXAMPLE_PROMPTS = [
-  'Write a professional email to reschedule a meeting',
-  'Explain binary search with a Python example and complexity',
-  'Give me a healthy meal plan for a busy workday',
-  'Write a cover letter for a software engineer role',
-  'Optimize this O(n²) code to O(n log n)',
-  'Suggest a 7-day budget travel plan for Manali'
+/** Quick action prompts shown on the home screen (fallback if none typed) */
+export const QUICK_PROMPTS = [
+  'Explain how binary search works with a Python example and complexity analysis',
+  'Review this code and identify any bugs or performance issues',
+  'Write unit tests for a function that validates email addresses',
+  'Explain the difference between async/await and Promises in JavaScript',
+  'Optimize this O(n²) algorithm to O(n log n)',
+  'Explain the SOLID principles with a concrete code example'
 ]

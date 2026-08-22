@@ -15,8 +15,8 @@
 import { pipeline, env } from '@huggingface/transformers'
 
 // ─── Whisper Model Config ─────────────────────────────────────────────────────
-// Use onnx-community which has updated weights compatible with latest ORT
-const MODEL_ID = 'onnx-community/whisper-tiny.en'
+// Xenova/whisper-tiny.en is optimized and quantized (~39 MB), fast and lightweight
+const MODEL_ID = 'Xenova/whisper-tiny.en'
 
 // Cache model in app's local cache dir (persists across sessions)
 env.allowLocalModels = false
@@ -37,8 +37,7 @@ async function getWhisperPipeline (onProgress) {
 
   modelLoadPromise = pipeline('automatic-speech-recognition', MODEL_ID, {
     progress_callback: onProgress,
-    dtype: 'fp32', // Force 32-bit floats to avoid quantization errors on Mac
-    device: 'wasm'
+    dtype: 'fp32'
   }).then(p => {
     whisperPipeline = p
     modelLoadPromise = null
@@ -98,13 +97,11 @@ export function createVoiceInput ({ onResult, onStart, onStop, onError, onModelS
   // ── Model Progress Handler ─────────────────────────────────────────────────
   function handleModelProgress (progress) {
     if (!onModelStatus) return
-    // transformers.js sends: 'initiate', 'download', 'progress', 'done', 'ready'
-    if (progress.status === 'progress' || progress.status === 'download') {
-      const pct = progress.progress ? Math.round(progress.progress) : 0
+    // transformers.js sends: 'initiate', 'download', 'progress', 'progress_total', 'done', 'ready'
+    if (progress.status === 'progress' || progress.status === 'download' || progress.status === 'progress_total') {
+      const pct = typeof progress.progress === 'number' ? Math.round(progress.progress) : 0
       onModelStatus({ status: 'downloading', progress: pct })
     } else if (progress.status === 'done' || progress.status === 'ready') {
-      // It might send 'done' per file, we'll wait for the final getWhisperPipeline to resolve
-      // but we can update the status to let UI know it's finishing up
       onModelStatus({ status: 'loading' })
     } else {
       onModelStatus({ status: 'loading' })
