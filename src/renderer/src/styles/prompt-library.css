@@ -1,0 +1,253 @@
+/* prompt-library.css — CodeLoom Prompt Library panel styles */
+
+.pl-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(6px);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.15s ease;
+}
+
+.pl-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  width: min(660px, 95vw);
+  height: min(580px, 90vh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.2s ease;
+}
+
+.pl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.pl-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+/* Tabs */
+.pl-tabs {
+  display: flex;
+  gap: 0;
+  padding: 12px 20px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.pl-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-secondary);
+  font-size: 0.87rem;
+  font-weight: 500;
+  padding: 8px 16px 10px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.pl-tab:hover { color: var(--text-primary); }
+.pl-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Content */
+.pl-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 20px;
+}
+
+/* Category */
+.pl-category { margin-bottom: 20px; }
+
+.pl-category-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
+/* Prompt item */
+.pl-prompt-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  margin-bottom: 6px;
+  background: var(--bg-primary);
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.pl-prompt-item:hover { border-color: var(--accent); background: var(--accent-muted); }
+
+.pl-prompt-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pl-prompt-title {
+  font-size: 0.87rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pl-prompt-preview {
+  font-size: 0.77rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Action buttons */
+.pl-run-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.pl-run-btn:hover { opacity: 0.85; }
+
+.pl-item-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.pl-edit-btn, .pl-delete-btn {
+  background: none;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 5px 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.pl-edit-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+.pl-delete-btn:hover { background: rgba(239, 68, 68, 0.12); border-color: rgba(239, 68, 68, 0.4); color: #f87171; }
+
+/* New / edit form */
+.pl-new-form, .pl-edit-form {
+  background: var(--bg-primary);
+  border: 1px solid var(--accent);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pl-input {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.pl-input:focus { outline: none; border-color: var(--accent); }
+
+.pl-textarea {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+  line-height: 1.5;
+  padding: 8px 10px;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+}
+
+.pl-textarea:focus { outline: none; border-color: var(--accent); }
+
+.pl-form-actions { display: flex; gap: 8px; }
+
+.pl-save-btn {
+  background: var(--accent);
+  border: none;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 0.83rem;
+  font-weight: 600;
+  padding: 7px 16px;
+  cursor: pointer;
+}
+
+.pl-cancel-btn {
+  background: var(--bg-hover);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
+  color: var(--text-secondary);
+  font-size: 0.83rem;
+  padding: 7px 14px;
+  cursor: pointer;
+}
+
+.pl-add-btn {
+  background: var(--bg-primary);
+  border: 1px dashed var(--border-muted, var(--accent));
+  border-radius: 8px;
+  color: var(--accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom: 14px;
+  transition: background 0.15s;
+}
+
+.pl-add-btn:hover { background: var(--accent-muted); }
+
+.pl-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  padding: 40px 20px;
+}
+
+.pl-empty p { margin: 6px 0; }
