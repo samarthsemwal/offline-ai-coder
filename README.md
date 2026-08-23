@@ -15,7 +15,7 @@
 
 Get the latest standalone macOS build from [GitHub Releases](https://github.com/samarthsemwal/offline-ai-coder/releases):
 
-- **macOS (Apple Silicon — M1/M2/M3/M4)**: Download **`CodeLoom-1.0.0-arm64.dmg`** or **`CodeLoom-1.0.0-arm64-mac.zip`**
+- **macOS (Apple Silicon — M1/M2/M3/M4/M5)**: Download **`CodeLoom-1.0.0-arm64.dmg`** or **`CodeLoom-1.0.0-arm64-mac.zip`**
 
 ### Quick Prerequisites
 1. Install and start [Ollama](https://ollama.com/download)
